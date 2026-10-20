@@ -76,6 +76,10 @@ h1{font-size:clamp(26px,7vw,34px);line-height:1.2;margin:0;font-weight:700;lette
 .line .v{font:600 15px var(--mono);text-align:right;white-space:nowrap}
 .tag{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px;background:var(--accent-soft);color:var(--accent)}
 .line.min .v{color:var(--accent)}
+.grp{font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.06em;padding-top:16px}
+.line.sum{border-bottom:1px solid var(--line)}
+.line.sum span:first-child{font-weight:600}
+.line .hint{display:inline}
 .note{font-size:13px;color:var(--soft);background:var(--bg);border-radius:10px;padding:12px 14px;margin-top:8px}
 .note b{color:var(--ink)}
 .cta{appearance:none;width:100%;border:1px solid var(--accent);background:var(--paper);color:var(--accent);font:600 15px var(--sans);padding:12px;border-radius:10px;cursor:pointer;margin-top:10px}
@@ -270,12 +274,20 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
         </div>
       </div>
       <div class="row">
-        <label for="legal3">등기 비용 <span class="hint">법무사·국민주택채권 할인 등, 자동 예상값</span></label>
-        <div class="field"><input id="legal3" inputmode="numeric" value="120"><span class="unit">만원</span></div>
+        <label for="pub3">공시가격 <span class="hint">국민주택채권 계산용, 모르면 자동 예상값(매매가의 70%)</span></label>
+        <div class="field"><input id="pub3" inputmode="numeric" value="42,000"><span class="unit">만원</span></div>
+        <div class="read" id="pub3-r"></div>
       </div>
       <div class="row">
-        <label for="move3">이사·입주 비용 <span class="hint">이사·입주청소·가전 등, 없으면 0</span></label>
-        <div class="field"><input id="move3" inputmode="numeric" value="200"><span class="unit">만원</span></div>
+        <span class="lab">집 위치 <span class="hint">채권 매입 비율이 달라요</span></span>
+        <div class="seg">
+          <input type="radio" name="bcity" id="bc-y" value="1" checked><label for="bc-y">서울·광역시</label>
+          <input type="radio" name="bcity" id="bc-n" value="0"><label for="bc-n">그 외 지역</label>
+        </div>
+      </div>
+      <div class="row">
+        <label for="legal3">법무사 보수 <span class="hint">견적 받으면 그 금액으로 바꾸세요</span></label>
+        <div class="field"><input id="legal3" inputmode="numeric" value="50"><span class="unit">만원</span></div>
       </div>
     </div>
 
@@ -286,15 +298,28 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
         <span class="sub" id="cash-sub"></span>
       </div>
       <div class="slip-body">
-        <div class="line"><span>집값 − 대출 <span class="hint">계약금 + 잔금</span></span><span class="v" id="c-own"></span></div>
-        <div class="line"><span>취득세 <b id="c-taxp"></b></span><span class="v" id="c-tax"></span></div>
+        <div class="line sum"><span>집값 − 대출 <span class="hint">계약금 + 잔금</span></span><span class="v" id="c-own"></span></div>
+
+        <div class="grp">세금</div>
+        <div class="line"><span>취득세 <span class="hint" id="c-taxp"></span></span><span class="v" id="c-tax"></span></div>
         <div class="line" id="c-dis-l"><span>생애최초 감면</span><span class="v" id="c-dis"></span></div>
-        <div class="line"><span>지방교육세</span><span class="v" id="c-edu"></span></div>
-        <div class="line" id="c-agri-l"><span>농어촌특별세</span><span class="v" id="c-agri"></span></div>
-        <div class="line"><span>중개수수료 <b id="c-feep"></b></span><span class="v" id="c-fee"></span></div>
-        <div class="line"><span>인지세 <span class="hint">매매계약서 + 대출 약정</span></span><span class="v" id="c-stamp"></span></div>
-        <div class="line"><span>등기 비용</span><span class="v" id="c-legal"></span></div>
-        <div class="line"><span>이사·입주 비용</span><span class="v" id="c-move"></span></div>
+        <div class="line"><span>지방교육세 <span class="hint">취득세의 10%</span></span><span class="v" id="c-edu"></span></div>
+        <div class="line" id="c-agri-l"><span>농어촌특별세 <span class="hint">집값의 0.2%</span></span><span class="v" id="c-agri"></span></div>
+        <div class="line"><span>인지세 <span class="hint">매매계약서</span></span><span class="v" id="c-st1"></span></div>
+        <div class="line"><span>인지세 <span class="hint">대출 약정, 은행과 반반</span></span><span class="v" id="c-st2"></span></div>
+        <div class="line sum"><span>세금 합계</span><span class="v" id="c-taxsum"></span></div>
+
+        <div class="grp">등기 비용</div>
+        <div class="line"><span>국민주택채권 할인 비용 <span class="hint" id="c-bondp"></span></span><span class="v" id="c-bond"></span></div>
+        <div class="line"><span>법무사 보수</span><span class="v" id="c-legal"></span></div>
+        <div class="line"><span>등기신청 수수료 <span class="hint">소유권 이전</span></span><span class="v" id="c-reg"></span></div>
+        <div class="line sum"><span>등기 비용 합계</span><span class="v" id="c-regsum"></span></div>
+
+        <div class="grp">중개수수료</div>
+        <div class="line"><span>중개보수 <span class="hint" id="c-feep"></span></span><span class="v" id="c-fee"></span></div>
+        <div class="line" id="c-vat-l"><span>부가세 <span class="hint">10%</span></span><span class="v" id="c-vat"></span></div>
+        <div class="line sum"><span>중개수수료 합계</span><span class="v" id="c-feesum"></span></div>
+
         <div class="note" id="cash-note"></div>
       </div>
     </div>
@@ -312,7 +337,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
       <li>수도권·규제지역 주택구입 대출 상한: 집값 15억 이하 6억, 15~25억 4억, 25억 초과 2억. 대출 기간은 최대 30년, 6개월 안에 전입해야 해요.</li>
       <li>집 가격은 KB부동산 시세(일반평균가)와 실제 매매가 중 낮은 금액을 쓰는 경우가 많고, 시세가 없는 집은 은행 감정가를 써요. 은행마다 기준이 조금씩 달라요.</li>
       <li>필요한 돈: 무주택자가 집 1채를 사는 기준이에요. 취득세 6억 이하 1%, 6~9억 구간별 1~3%, 9억 초과 3%이고 지방교육세는 취득세의 10%, 85㎡ 초과면 농어촌특별세 0.2%가 붙어요. 이미 집이 있으면 세율이 달라질 수 있어요.</li>
-      <li>중개수수료는 법정 최대 요율(2억~9억 0.4% 등)로 계산했고, 등기 비용은 집값의 약 0.2%로 잡은 예상값이에요. 법무사 견적을 받으면 그 금액으로 바꿔 넣으세요.</li>
+      <li>중개수수료는 법정 최대 요율(2억~9억 0.4% 등)로 계산했고, 등기 비용의 국민주택채권은 공시가격 × 매입률(서울·광역시 1.3~3.1%, 그 외 1.3~2.6%)만큼 사서 바로 팔 때 생기는 손실(할인율 약 8%, 매일 바뀜)이에요. 법무사 보수는 견적을 받으면 그 금액으로 바꿔 넣으세요.</li>
       <li>방공제(소액임차보증금 차감), 신용점수, 은행별 심사, 디딤돌·보금자리론 같은 정책대출 한도는 반영하지 않았어요.</li>
       <li>규제는 자주 바뀌어요. 실제 한도는 꼭 은행 상담으로 확인하세요.</li>
     </ul>
@@ -485,60 +510,77 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
 
   // ③ 필요한 돈
   const touched = {};
-  ['price3','loan3','legal3'].forEach(id=>$(id).addEventListener('input', ()=>{ touched[id]=true; }));
+  ['price3','loan3','pub3'].forEach(id=>$(id).addEventListener('input', ()=>{ touched[id]=true; }));
   function syncCash(){
     if (!touched.price3) $('price3').value = num($('price')).toLocaleString('ko-KR');
     if (!touched.loan3) $('loan3').value = lastLimit.toLocaleString('ko-KR');
-    if (!touched.legal3) $('legal3').value = Math.round(num($('price3'))*0.002).toLocaleString('ko-KR');
+    if (!touched.pub3) $('pub3').value = Math.round(num($('price3'))*0.7).toLocaleString('ko-KR');
   }
+  $('price3').addEventListener('input', ()=>{ if (!touched.pub3) $('pub3').value = Math.round(num($('price3'))*0.7).toLocaleString('ko-KR'); });
+  function wonFine(man){ return man < 100 ? Math.round(man*10000).toLocaleString('ko-KR')+'원' : won(man); }
   function calcCash(){
-    const price = num($('price3')), loan = Math.min(num($('loan3')), price);
-    const big = radio('area') === '1', dis = radio('fdis') === '1', vat = radio('vat') === '1';
-    const legal = num($('legal3')), move = num($('move3'));
+    const price = num($('price3')), loan = Math.min(num($('loan3')), price), pub = num($('pub3'));
+    const big = radio('area') === '1', dis = radio('fdis') === '1', vat = radio('vat') === '1', city = radio('bcity') === '1';
+    const legal = num($('legal3'));
     $('price3-r').textContent = price ? won(price) : '';
     $('loan3-r').textContent = loan ? won(loan) : '';
+    $('pub3-r').textContent = pub ? won(pub) : '';
 
-    // 취득세 (무주택자 1주택 기준): 6억 이하 1%, 6~9억 (가액/억 x 2/3 - 3)%, 9억 초과 3%
+    // 세금 (무주택자 1주택 기준)
     let rate = price <= 60000 ? 1 : price <= 90000 ? (price/10000*2/3 - 3) : 3;
     rate = Math.round(rate*100)/100;
     const tax = price*rate/100;
-    const edu = tax*0.1;
     const disc = (dis && price <= 120000) ? Math.min(200, tax) : 0;
+    const edu = tax*0.1;
     const agri = big ? price*0.002 : 0;
+    const st1 = price <= 10000 ? 0 : price <= 100000 ? 15 : 35;
+    const st2 = loan <= 5000 ? 0 : loan <= 10000 ? 3.5 : loan <= 100000 ? 7.5 : 17.5;
+    const taxSum = tax - disc + edu + agri + st1 + st2;
+
+    // 등기: 국민주택채권 (공시가격 x 매입률 x 할인율 약 8%)
+    const tb = [[2000,0,0],[5000,13,13],[10000,19,14],[16000,21,16],[26000,23,18],[60000,26,21],[Infinity,31,26]];
+    let br = 0;
+    for (let i=0;i<tb.length;i++){ if (pub < tb[i][0]){ br = tb[i][city?1:2]; break; } }
+    const bondBuy = pub*br/1000, bond = bondBuy*0.08;
+    const reg = 1.5;
+    const regSum = bond + legal + reg;
 
     // 중개수수료 상한 (매매)
     let fr, fcap = Infinity;
     if (price < 5000){ fr=0.6; fcap=25; } else if (price < 20000){ fr=0.5; fcap=80; }
     else if (price < 90000) fr=0.4; else if (price < 120000) fr=0.5; else if (price < 150000) fr=0.6; else fr=0.7;
-    let fee = Math.min(price*fr/100, fcap); if (vat) fee *= 1.1;
-
-    // 인지세: 매매계약서(1억 이하 주택 면제) + 대출 약정서(은행과 반반)
-    const st1 = price <= 10000 ? 0 : price <= 100000 ? 15 : 35;
-    const st2 = loan <= 5000 ? 0 : loan <= 10000 ? 3.5 : loan <= 100000 ? 7.5 : 17.5;
-    const stamp = st1 + st2;
+    const fee = Math.min(price*fr/100, fcap), feeVat = vat ? fee*0.1 : 0;
+    const feeSum = fee + feeVat;
 
     const own = price - loan;
-    const extra = tax - disc + edu + agri + fee + stamp + legal + move;
-    const total = own + extra;
+    const extra = taxSum + regSum + feeSum;
 
-    $('cash').textContent = won(Math.ceil(total));
-    $('cash-sub').textContent = '집값 외 부대비용만 '+won(Math.ceil(extra))+' 들어요';
+    $('cash').textContent = won(Math.ceil(own + extra));
+    $('cash-sub').textContent = '집값 외 세금·수수료만 '+won(Math.ceil(extra))+' 들어요';
     $('c-own').textContent = won(own);
-    $('c-taxp').textContent = '('+rate+'%)';
+    $('c-taxp').textContent = price > 60000 && price <= 90000
+      ? '6~9억 구간 '+rate+'% (가격÷1억×2/3−3)' : '집값의 '+rate+'%';
     $('c-tax').textContent = won(tax);
     $('c-dis-l').hidden = !disc; $('c-dis').textContent = '− '+won(disc);
     $('c-edu').textContent = won(edu);
     $('c-agri-l').hidden = !agri; $('c-agri').textContent = won(agri);
-    $('c-feep').textContent = '(최대 '+fr+'%'+(vat?' + 부가세':'')+')';
-    $('c-fee').textContent = won(fee);
-    $('c-stamp').textContent = won(stamp);
+    $('c-st1').textContent = wonFine(st1);
+    $('c-st2').textContent = wonFine(st2);
+    $('c-taxsum').textContent = won(taxSum);
+    $('c-bondp').textContent = br ? '채권 '+won(bondBuy)+' 매입 후 즉시 매도, 할인율 약 8%' : '공시가 2천만원 미만 면제';
+    $('c-bond').textContent = won(bond);
     $('c-legal').textContent = won(legal);
-    $('c-move').textContent = won(move);
-    $('cash-note').innerHTML = '<b>계약금</b>은 보통 집값의 10%(약 '+won(price*0.1)+')를 계약할 때 먼저 내요. 취득세는 잔금일로부터 <b>60일 안</b>에 신고·납부해야 하고, 중개수수료는 최대 요율이라 협의로 낮출 수 있어요.';
+    $('c-reg').textContent = wonFine(reg);
+    $('c-regsum').textContent = won(regSum);
+    $('c-feep').textContent = '최대 '+fr+'%'+(fcap<Infinity?', 한도 '+fcap+'만원':'');
+    $('c-fee').textContent = won(fee);
+    $('c-vat-l').hidden = !feeVat; $('c-vat').textContent = won(feeVat);
+    $('c-feesum').textContent = won(feeSum);
+    $('cash-note').innerHTML = '<b>계약금</b>은 보통 집값의 10%(약 '+won(price*0.1)+')를 계약할 때 먼저 내요. 취득세는 잔금일로부터 <b>60일 안</b>에 신고·납부해야 하고, 중개수수료는 최대 요율이라 협의로 낮출 수 있어요. 근저당 설정 비용은 보통 은행이 내요.';
   }
   $('p3').addEventListener('input', calcCash);
   $('p3').addEventListener('change', calcCash);
-  $('go3').addEventListener('click', ()=>{ touched.price3=false; touched.loan3=false; touched.legal3=false; syncCash(); calcCash(); select(2); window.scrollTo({top:0, behavior:'smooth'}); });
+  $('go3').addEventListener('click', ()=>{ touched.price3=false; touched.loan3=false; touched.pub3=false; syncCash(); calcCash(); select(2); window.scrollTo({top:0, behavior:'smooth'}); });
   $('t3').addEventListener('click', ()=>{ syncCash(); calcCash(); select(2); });
 
   calcLimit(); calcPay(); syncCash(); calcCash();
