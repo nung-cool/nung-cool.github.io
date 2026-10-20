@@ -172,15 +172,15 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
 
     <div class="slip" aria-live="polite">
       <div class="slip-head">
-        <span class="k">예상 최대 대출 한도</span>
+        <span class="k">예상 최대 대출 한도 · 고정금리 기준</span>
         <span class="big" id="lim">-</span>
         <span class="sub" id="lim-sub"></span>
       </div>
       <div class="slip-body">
         <div class="line" id="l-ltv"><span>집값 기준 (LTV <b id="ltvp"></b>)</span><span class="v" id="v-ltv"></span></div>
         <div class="line" id="l-cap"><span>지역 상한</span><span class="v" id="v-cap"></span></div>
-        <div class="line" id="l-dsr"><span>소득 기준 (DSR 40%, 변동금리)</span><span class="v" id="v-dsr"></span></div>
-        <div class="line" id="l-dsrf"><span>소득 기준 (고정금리라면)</span><span class="v" id="v-dsrf"></span></div>
+        <div class="line" id="l-dsr"><span>소득 기준 (DSR 40%, 고정금리)</span><span class="v" id="v-dsr"></span></div>
+        <div class="line" id="l-dsrf"><span>소득 기준 (변동금리라면)</span><span class="v" id="v-dsrf"></span></div>
         <div class="note" id="why"></div>
         <button class="cta" id="go2" type="button">이 금액으로 월 상환액 보기 →</button>
       </div>
@@ -240,6 +240,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
       <li>은행권 DSR 40%를 기준으로, 연소득의 40% 안에서 모든 대출 원리금을 갚을 수 있는 금액까지만 계산해요.</li>
       <li>스트레스 금리: 수도권·규제지역은 실제 금리에 3.0%p, 지방은 0.75%p(1.5% × 50%)를 더해 한도를 계산해요. 실제로 내는 이자가 늘어나는 건 아니에요. 고정금리·주기형은 가산이 줄거나 빠져서 한도가 더 나올 수 있어요.</li>
       <li>규제지역(2026년 10월): 서울 전역, 경기 과천·광명·구리·의왕·하남, 성남 분당·수정·중원, 수원 영통·장안·팔달, 안양 동안, 용인 수지·기흥, 화성 동탄. 규제지역은 바뀔 수 있어요.</li>
+      <li>큰 숫자는 스트레스 금리가 붙지 않는 고정금리 기준 최대치예요. 주기형·혼합형은 상품에 따라 일부 가산될 수 있어서 그 사이 금액이 나올 수 있어요.</li>
       <li>LTV: 규제지역 40%, 비규제 70%, 생애최초는 수도권·규제지역 70%, 그 외 80%.</li>
       <li>수도권·규제지역 주택구입 대출 상한: 집값 15억 이하 6억, 15~25억 4억, 25억 초과 2억. 대출 기간은 최대 30년, 6개월 안에 전입해야 해요.</li>
       <li>집 가격은 KB부동산 시세(일반평균가)와 실제 매매가 중 낮은 금액을 쓰는 경우가 많고, 시세가 없는 집은 은행 감정가를 써요. 은행마다 기준이 조금씩 달라요.</li>
@@ -322,30 +323,30 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
 
     const limV = Math.min(ltv, cap, dsrV);
     const limF = Math.min(ltv, cap, dsrF);
-    lastLimit = Math.floor(limV/100)*100;
+    lastLimit = Math.floor(limF/100)*100;
 
     $('ltvp').textContent = ltvPct+'%';
     $('v-ltv').textContent = won(ltv);
     $('v-cap').textContent = capped ? won(cap) : '없음';
-    $('v-dsr').textContent = won(dsrV);
-    $('v-dsrf').textContent = won(dsrF);
+    $('v-dsr').textContent = won(dsrF);
+    $('v-dsrf').textContent = won(dsrV);
 
     $('lim').textContent = won(lastLimit);
     $('lim-sub').textContent = limF > limV + 50
-      ? '고정금리로 받으면 최대 '+won(Math.floor(limF/100)*100)+'까지 가능해요'
-      : (price ? '집값의 '+Math.round(limV/price*100)+'% 정도를 빌릴 수 있어요' : '');
+      ? '변동금리로 받으면 '+won(Math.floor(limV/100)*100)+'로 줄어요'
+      : (price ? '집값의 '+Math.round(limF/price*100)+'% 정도를 빌릴 수 있어요' : '');
 
     // 무엇이 한도를 정했는지
     ['l-ltv','l-cap','l-dsr'].forEach(id=>$(id).classList.remove('min'));
     document.querySelectorAll('.slip .tag').forEach(t=>t.remove());
-    const which = limV === ltv ? 'l-ltv' : limV === cap ? 'l-cap' : 'l-dsr';
+    const which = limF === ltv ? 'l-ltv' : limF === cap ? 'l-cap' : 'l-dsr';
     $(which).classList.add('min');
     const t = document.createElement('span'); t.className='tag'; t.textContent='여기서 결정';
     $(which).firstElementChild.appendChild(t);
 
     const need = Math.max(0, price - lastLimit);
     const msg = which === 'l-dsr'
-      ? '<b>소득이 한도를 정하고 있어요.</b> 소득을 늘리거나 기존 대출을 줄이면, 또는 고정금리 상품을 고르면 한도가 늘어날 수 있어요.'
+      ? '<b>소득이 한도를 정하고 있어요.</b> 소득을 늘리거나 기존 대출을 줄이면 한도가 늘어날 수 있어요. 변동금리를 고르면 오히려 줄어들어요.'
       : which === 'l-cap'
       ? '<b>지역 상한에 걸렸어요.</b> 소득이 더 많아도 이 지역에선 이 금액 이상 빌릴 수 없어요.'
       : '<b>집값 기준(LTV)이 한도를 정하고 있어요.</b> 소득으로는 더 빌릴 수 있지만 집값 대비 비율에 막혀요.';
