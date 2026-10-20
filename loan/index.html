@@ -13,20 +13,20 @@
 <style>
 /* Layout: 한 열짜리 '은행 창구 서식' — 입력 서식 위, 결과 전표 아래. 숫자는 고정폭. */
 :root{
-  --bg:#edf0f3; --paper:#ffffff; --ink:#16202b; --soft:#5a6672; --faint:#8a95a0;
-  --line:#d9dfe5; --accent:#2f5bd3; --accent-ink:#ffffff; --accent-soft:#e6ecfb;
-  --warn:#b4541c; --ok:#2b7a55; --bar-int:#c9d4f3;
+  --bg:#fff5f7; --paper:#ffffff; --ink:#2b1d22; --soft:#6e5a61; --faint:#a08c93;
+  --line:#f3dde3; --accent:#c2557a; --accent-ink:#8a3a55; --accent-soft:#ffe9ef; --band:#ffd6e0;
+  --warn:#b4541c; --ok:#2b7a55; --bar-int:#ffe3ea;
   --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#11161c; --paper:#1a2129; --ink:#e7ecf1; --soft:#a6b1bc; --faint:#76828e;
-  --line:#2b343e; --accent:#7d9bf0; --accent-ink:#0e1420; --accent-soft:#1f2a44;
-  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#34436b; color-scheme:dark}}
+  --bg:#1f1619; --paper:#2a1e22; --ink:#f5e6ea; --soft:#c7aeb6; --faint:#8f7880;
+  --line:#3d2c32; --accent:#f19bb6; --accent-ink:#ffe3ea; --accent-soft:#3d2430; --band:#5a2e3e;
+  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#4a2d38; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#11161c; --paper:#1a2129; --ink:#e7ecf1; --soft:#a6b1bc; --faint:#76828e;
-  --line:#2b343e; --accent:#7d9bf0; --accent-ink:#0e1420; --accent-soft:#1f2a44;
-  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#34436b; color-scheme:dark}
+  --bg:#1f1619; --paper:#2a1e22; --ink:#f5e6ea; --soft:#c7aeb6; --faint:#8f7880;
+  --line:#3d2c32; --accent:#f19bb6; --accent-ink:#ffe3ea; --accent-soft:#3d2430; --band:#5a2e3e;
+  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#4a2d38; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
@@ -40,7 +40,7 @@ h1{font-size:clamp(26px,7vw,34px);line-height:1.2;margin:0;font-weight:700;lette
 
 .tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
 .tab{appearance:none;border:0;background:transparent;color:var(--soft);font:600 15px var(--sans);padding:11px 8px;border-radius:9px;cursor:pointer}
-.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.tab[aria-selected="true"]{background:var(--band);color:var(--accent-ink)}
 .tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .form{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:6px 18px}
@@ -66,7 +66,7 @@ h1{font-size:clamp(26px,7vw,34px);line-height:1.2;margin:0;font-weight:700;lette
 
 /* 결과 전표 */
 .slip{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.slip-head{background:var(--accent);color:var(--accent-ink);padding:18px 18px 16px;display:grid;gap:2px}
+.slip-head{background:var(--band);color:var(--accent-ink);padding:18px 18px 16px;display:grid;gap:2px}
 .slip-head .k{font-size:13px;opacity:.85}
 .big{font:600 clamp(28px,8.5vw,38px)/1.15 var(--mono);letter-spacing:-.02em}
 .slip-head .sub{font-size:13px;opacity:.9}
