@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="신혼부부 넝쿨이가 직접 만든 계산기와 정리 자료 모음">
+<meta property="og:title" content="넝쿨이 서랍">
+<meta property="og:description" content="신혼부부 넝쿨이가 직접 만든 계산기와 정리 자료 모음">
+<title>넝쿨이 서랍</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#edf0f3;--paper:#fff;--ink:#16202b;--soft:#5a6672;--faint:#8a95a0;--line:#d9dfe5;--accent:#2f5bd3;--accent-soft:#e6ecfb;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#11161c;--paper:#1a2129;--ink:#e7ecf1;--soft:#a6b1bc;--faint:#76828e;--line:#2b343e;--accent:#7d9bf0;--accent-soft:#1f2a44;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6;
+ padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;padding-block:48px 56px;display:grid;gap:28px}
+.kicker{font-size:12px;letter-spacing:.12em;color:var(--faint);font-weight:600}
+h1{font-size:clamp(28px,8vw,36px);line-height:1.2;margin:6px 0 8px;letter-spacing:-.02em}
+p{margin:0;color:var(--soft);font-size:15px}
+.list{display:grid;gap:12px}
+a.item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px}
+a.item:hover,a.item:focus-visible{border-color:var(--accent);outline:none}
+.t{font-weight:700;font-size:17px}
+.d{font-size:14px;color:var(--soft)}
+.badge{font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 9px;margin-right:6px}
+.arrow{color:var(--accent);font-size:20px}
+footer{font-size:12px;color:var(--faint);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">NUNG-COOL</div>
+    <h1>넝쿨이 서랍</h1>
+    <p>내 집 마련하고 아기 준비하는 신혼부부가 직접 쓰려고 만든 계산기와 자료를 모아뒀어요.</p>
+  </header>
+  <div class="list">
+    <a class="item" href="./loan/">
+      <div><div class="t">우리 부부, 대출 얼마나 나올까?</div>
+      <div class="d"><span class="badge">계산기</span>연봉·집값으로 대출 한도와 월 상환액 계산</div></div>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+  <footer>참고용 자료예요. 중요한 결정 전엔 꼭 전문가와 확인하세요.</footer>
+</div>
+</body>
+</html>
