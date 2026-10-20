@@ -113,7 +113,15 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   <section id="p1" role="tabpanel" aria-labelledby="t1" style="display:grid;gap:16px">
     <div class="form">
       <div class="row">
-        <label for="inc">부부 합산 연소득 <span class="hint">세전</span></label>
+        <span class="lab">누구 소득으로 계산할까요?</span>
+        <div class="seg">
+          <input type="radio" name="who" id="w-2" value="2" checked><label for="w-2">부부 합산</label>
+          <input type="radio" name="who" id="w-1" value="1"><label for="w-1">나 혼자</label>
+        </div>
+        <div class="zone" id="who-note"></div>
+      </div>
+      <div class="row">
+        <label for="inc"><span id="inc-lab">부부 합산 연소득</span> <span class="hint">세전</span></label>
         <div class="field"><input id="inc" inputmode="numeric" value="9,000"><span class="unit">만원</span></div>
         <div class="read" id="inc-r"></div>
       </div>
@@ -170,7 +178,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
         <div class="read" id="yrs-r"></div>
       </div>
       <div class="row">
-        <label for="exist">기존 대출 1년 상환액 <span class="hint">신용·자동차 할부 등, 없으면 0</span></label>
+        <label for="exist">기존 대출 1년 상환액 <span class="hint" id="exist-hint">두 사람 대출 모두, 마이너스통장은 한도 전체 기준, 없으면 0</span></label>
         <div class="field"><input id="exist" inputmode="numeric" value="0"><span class="unit">만원/년</span></div>
       </div>
     </div>
@@ -392,6 +400,14 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
     let yrs = num($('yrs')) || 30;
     const exist = num($('exist')), region = $('region').value, first = radio('first') === '1';
 
+    const solo = radio('who') === '1';
+    $('inc-lab').textContent = solo ? '내 연소득' : '부부 합산 연소득';
+    $('exist-hint').textContent = solo
+      ? '내 신용·자동차 할부 등, 마이너스통장은 한도 전체 기준, 없으면 0'
+      : '두 사람 대출 모두, 마이너스통장은 한도 전체 기준, 없으면 0';
+    $('who-note').innerHTML = solo
+      ? '내 명의로만 대출받는 경우예요. <b>배우자 대출은 계산에 안 들어가요.</b>'
+      : '공동명의·공동차주로 받을 때 기준이에요. <b>배우자 대출도 합쳐서</b> 계산돼요.';
     $('inc-r').textContent = inc ? won(inc) : '';
     $('price-r').textContent = price ? won(price) : '';
 
