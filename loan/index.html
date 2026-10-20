@@ -52,6 +52,10 @@ h1{font-size:clamp(26px,7vw,34px);line-height:1.2;margin:0;font-weight:700;lette
 .field input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:600 18px var(--mono);padding:11px 0;text-align:right}
 .field input:focus{outline:none}
 .field:focus-within{border-color:var(--accent)}
+.field select{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:600 16px var(--sans);padding:12px 0;appearance:none;-webkit-appearance:none;cursor:pointer}
+.field select:focus{outline:none}
+.zone{font-size:12.5px;color:var(--soft)}
+.zone b{color:var(--accent)}
 .unit{color:var(--soft);font-size:14px;white-space:nowrap}
 .read{font-size:12.5px;color:var(--accent);text-align:right;min-height:1em;font-family:var(--mono)}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
@@ -114,12 +118,34 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
         <div class="read" id="price-r"></div>
       </div>
       <div class="row">
-        <span class="lab">집 위치</span>
-        <div class="seg">
-          <input type="radio" name="region" id="rg-reg" value="reg"><label for="rg-reg">서울·규제지역</label>
-          <input type="radio" name="region" id="rg-metro" value="metro" checked><label for="rg-metro">수도권(비규제)</label>
-          <input type="radio" name="region" id="rg-local" value="local"><label for="rg-local">지방</label>
-        </div>
+        <label for="region">집이 있는 곳 <span class="hint">2026년 10월 기준</span></label>
+        <div class="field"><select id="region">
+          <optgroup label="서울">
+            <option value="reg">서울 (25개 구 전체)</option>
+          </optgroup>
+          <optgroup label="경기 · 규제지역">
+            <option value="reg">과천시</option>
+            <option value="reg">광명시</option>
+            <option value="reg">구리시</option>
+            <option value="reg">성남시 분당구</option>
+            <option value="reg">성남시 수정구</option>
+            <option value="reg">성남시 중원구</option>
+            <option value="reg">수원시 영통구</option>
+            <option value="reg">수원시 장안구</option>
+            <option value="reg">수원시 팔달구</option>
+            <option value="reg">안양시 동안구</option>
+            <option value="reg">용인시 기흥구</option>
+            <option value="reg">용인시 수지구</option>
+            <option value="reg">의왕시</option>
+            <option value="reg">하남시</option>
+            <option value="reg">화성시 동탄구</option>
+          </optgroup>
+          <optgroup label="그 외">
+            <option value="metro" selected>인천 · 그 밖의 경기</option>
+            <option value="local">지방 (수도권 밖)</option>
+          </optgroup>
+        </select></div>
+        <div class="zone" id="zone"></div>
       </div>
       <div class="row">
         <span class="lab">생애최초 주택 구입인가요? <span class="hint">부부 모두 집을 가져본 적 없음</span></span>
@@ -212,6 +238,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
     <ul>
       <li>은행권 DSR 40%를 기준으로, 연소득의 40% 안에서 모든 대출 원리금을 갚을 수 있는 금액까지만 계산해요.</li>
       <li>스트레스 금리: 수도권·규제지역은 실제 금리에 3.0%p, 지방은 0.75%p(1.5% × 50%)를 더해 한도를 계산해요. 실제로 내는 이자가 늘어나는 건 아니에요. 고정금리·주기형은 가산이 줄거나 빠져서 한도가 더 나올 수 있어요.</li>
+      <li>규제지역(2026년 10월): 서울 전역, 경기 과천·광명·구리·의왕·하남, 성남 분당·수정·중원, 수원 영통·장안·팔달, 안양 동안, 용인 수지·기흥, 화성 동탄. 규제지역은 바뀔 수 있어요.</li>
       <li>LTV: 규제지역 40%, 비규제 70%, 생애최초는 수도권·규제지역 70%, 그 외 80%.</li>
       <li>수도권·규제지역 주택구입 대출 상한: 집값 15억 이하 6억, 15~25억 4억, 25억 초과 2억. 대출 기간은 최대 30년, 6개월 안에 전입해야 해요.</li>
       <li>방공제(소액임차보증금 차감), 신용점수, 은행별 심사, 디딤돌·보금자리론 같은 정책대출 한도는 반영하지 않았어요.</li>
@@ -266,7 +293,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   function calcLimit(){
     const inc = num($('inc')), price = num($('price')), rate = num($('rate'));
     let yrs = num($('yrs')) || 30;
-    const exist = num($('exist')), region = radio('region'), first = radio('first') === '1';
+    const exist = num($('exist')), region = $('region').value, first = radio('first') === '1';
 
     $('inc-r').textContent = inc ? won(inc) : '';
     $('price-r').textContent = price ? won(price) : '';
@@ -274,6 +301,12 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
     const capped = region !== 'local';
     if (capped && yrs > 30){ yrs = 30; $('yrs-r').textContent = '수도권·규제지역은 최대 30년으로 계산해요'; }
     else $('yrs-r').textContent = '';
+
+    $('zone').innerHTML = region === 'reg'
+      ? '<b>규제지역</b>이에요. LTV 40%(생애최초 70%), 집값별 대출 상한이 있어요.'
+      : region === 'metro'
+      ? '<b>수도권 비규제지역</b>이에요. LTV 70%, 대출 상한은 규제지역과 같아요.'
+      : '<b>지방 비규제지역</b>이에요. LTV 70%(생애최초 80%), 대출 상한이 없어요.';
 
     const ltvPct = region === 'reg' ? (first ? 70 : 40)
                  : region === 'metro' ? 70
@@ -367,7 +400,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   $('go2').addEventListener('click', ()=>{
     $('amt').value = lastLimit.toLocaleString('ko-KR');
     $('rate2').value = $('rate').value;
-    const region = radio('region');
+    const region = $('region').value;
     let y = num($('yrs')) || 30; if (region !== 'local' && y > 30) y = 30;
     $('yrs2').value = y;
     calcPay(); select(1); window.scrollTo({top:0, behavior:'smooth'});
