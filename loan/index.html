@@ -13,20 +13,20 @@
 <style>
 /* Layout: 한 열짜리 '은행 창구 서식' — 입력 서식 위, 결과 전표 아래. 숫자는 고정폭. */
 :root{
-  --bg:#fff5f7; --paper:#ffffff; --ink:#2b1d22; --soft:#6e5a61; --faint:#a08c93;
-  --line:#f3dde3; --accent:#c2557a; --accent-ink:#8a3a55; --accent-soft:#ffe9ef; --band:#ffd6e0;
-  --warn:#b4541c; --ok:#2b7a55; --bar-int:#ffe3ea;
+  --bg:#fffbec; --paper:#ffffff; --ink:#2a2414; --soft:#6b6250; --faint:#a0977f;
+  --line:#f1e8c8; --accent:#8f6d12; --accent-ink:#6b5418; --accent-soft:#fdf3cf; --band:#fbecb4;
+  --warn:#b4541c; --ok:#2b7a55; --bar-int:#fbf0c6;
   --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#1f1619; --paper:#2a1e22; --ink:#f5e6ea; --soft:#c7aeb6; --faint:#8f7880;
-  --line:#3d2c32; --accent:#f19bb6; --accent-ink:#ffe3ea; --accent-soft:#3d2430; --band:#5a2e3e;
-  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#4a2d38; color-scheme:dark}}
+  --bg:#1c1912; --paper:#262218; --ink:#f3ecd9; --soft:#c5bb9f; --faint:#8c8470;
+  --line:#3a3426; --accent:#f0cf6b; --accent-ink:#fff3cc; --accent-soft:#3a3220; --band:#574718;
+  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#43391c; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#1f1619; --paper:#2a1e22; --ink:#f5e6ea; --soft:#c7aeb6; --faint:#8f7880;
-  --line:#3d2c32; --accent:#f19bb6; --accent-ink:#ffe3ea; --accent-soft:#3d2430; --band:#5a2e3e;
-  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#4a2d38; color-scheme:dark}
+  --bg:#1c1912; --paper:#262218; --ink:#f3ecd9; --soft:#c5bb9f; --faint:#8c8470;
+  --line:#3a3426; --accent:#f0cf6b; --accent-ink:#fff3cc; --accent-soft:#3a3220; --band:#574718;
+  --warn:#e59a6a; --ok:#6cc79c; --bar-int:#43391c; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
