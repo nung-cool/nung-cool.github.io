@@ -38,7 +38,7 @@ header{display:grid;gap:8px}
 h1{font-size:clamp(26px,7vw,34px);line-height:1.2;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
 .lede{margin:0;color:var(--soft);font-size:15px}
 
-.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
 .tab{appearance:none;border:0;background:transparent;color:var(--soft);font:600 15px var(--sans);padding:11px 8px;border-radius:9px;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--band);color:var(--accent-ink)}
 .tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -102,6 +102,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="t1" aria-selected="true" aria-controls="p1">① 대출 한도</button>
     <button class="tab" role="tab" id="t2" aria-selected="false" aria-controls="p2">② 월 상환액</button>
+    <button class="tab" role="tab" id="t3" aria-selected="false" aria-controls="p3">③ 필요한 돈</button>
   </div>
 
   <!-- 한도 -->
@@ -183,6 +184,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
         <div class="line" id="l-dsrf"><span>소득 기준 (변동금리라면)</span><span class="v" id="v-dsrf"></span></div>
         <div class="note" id="why"></div>
         <button class="cta" id="go2" type="button">이 금액으로 월 상환액 보기 →</button>
+        <button class="cta" id="go3" type="button">세금·수수료까지 필요한 돈 보기 →</button>
       </div>
     </div>
   </section>
@@ -233,6 +235,71 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
       </div>
     </div>
   </section>
+  <!-- 필요한 돈 -->
+  <section id="p3" role="tabpanel" aria-labelledby="t3" hidden style="display:grid;gap:16px">
+    <div class="form">
+      <div class="row">
+        <label for="price3">집 가격 <span class="hint">실제 매매가</span></label>
+        <div class="field"><input id="price3" inputmode="numeric" value="60,000"><span class="unit">만원</span></div>
+        <div class="read" id="price3-r"></div>
+      </div>
+      <div class="row">
+        <label for="loan3">받을 대출 금액</label>
+        <div class="field"><input id="loan3" inputmode="numeric" value="42,000"><span class="unit">만원</span></div>
+        <div class="read" id="loan3-r"></div>
+      </div>
+      <div class="row">
+        <span class="lab">전용면적</span>
+        <div class="seg">
+          <input type="radio" name="area" id="a-s" value="0" checked><label for="a-s">85㎡ 이하 <span class="hint">약 34평형 이하</span></label>
+          <input type="radio" name="area" id="a-l" value="1"><label for="a-l">85㎡ 초과</label>
+        </div>
+      </div>
+      <div class="row">
+        <span class="lab">생애최초 취득세 감면 <span class="hint">12억 이하, 최대 200만원</span></span>
+        <div class="seg">
+          <input type="radio" name="fdis" id="fd-y" value="1" checked><label for="fd-y">받아요</label>
+          <input type="radio" name="fdis" id="fd-n" value="0"><label for="fd-n">해당 없음</label>
+        </div>
+      </div>
+      <div class="row">
+        <span class="lab">중개수수료 부가세 <span class="hint">중개사무소가 일반과세자면 10% 추가</span></span>
+        <div class="seg">
+          <input type="radio" name="vat" id="v-y" value="1" checked><label for="v-y">포함</label>
+          <input type="radio" name="vat" id="v-n" value="0"><label for="v-n">미포함</label>
+        </div>
+      </div>
+      <div class="row">
+        <label for="legal3">등기 비용 <span class="hint">법무사·국민주택채권 할인 등, 자동 예상값</span></label>
+        <div class="field"><input id="legal3" inputmode="numeric" value="120"><span class="unit">만원</span></div>
+      </div>
+      <div class="row">
+        <label for="move3">이사·입주 비용 <span class="hint">이사·입주청소·가전 등, 없으면 0</span></label>
+        <div class="field"><input id="move3" inputmode="numeric" value="200"><span class="unit">만원</span></div>
+      </div>
+    </div>
+
+    <div class="slip" aria-live="polite">
+      <div class="slip-head">
+        <span class="k">내가 준비해야 할 현금</span>
+        <span class="big" id="cash">-</span>
+        <span class="sub" id="cash-sub"></span>
+      </div>
+      <div class="slip-body">
+        <div class="line"><span>집값 − 대출 <span class="hint">계약금 + 잔금</span></span><span class="v" id="c-own"></span></div>
+        <div class="line"><span>취득세 <b id="c-taxp"></b></span><span class="v" id="c-tax"></span></div>
+        <div class="line" id="c-dis-l"><span>생애최초 감면</span><span class="v" id="c-dis"></span></div>
+        <div class="line"><span>지방교육세</span><span class="v" id="c-edu"></span></div>
+        <div class="line" id="c-agri-l"><span>농어촌특별세</span><span class="v" id="c-agri"></span></div>
+        <div class="line"><span>중개수수료 <b id="c-feep"></b></span><span class="v" id="c-fee"></span></div>
+        <div class="line"><span>인지세 <span class="hint">매매계약서 + 대출 약정</span></span><span class="v" id="c-stamp"></span></div>
+        <div class="line"><span>등기 비용</span><span class="v" id="c-legal"></span></div>
+        <div class="line"><span>이사·입주 비용</span><span class="v" id="c-move"></span></div>
+        <div class="note" id="cash-note"></div>
+      </div>
+    </div>
+  </section>
+
 
   <details>
     <summary>계산 기준 · 꼭 읽어주세요</summary>
@@ -244,6 +311,8 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
       <li>LTV: 규제지역 40%, 비규제 70%, 생애최초는 수도권·규제지역 70%, 그 외 80%.</li>
       <li>수도권·규제지역 주택구입 대출 상한: 집값 15억 이하 6억, 15~25억 4억, 25억 초과 2억. 대출 기간은 최대 30년, 6개월 안에 전입해야 해요.</li>
       <li>집 가격은 KB부동산 시세(일반평균가)와 실제 매매가 중 낮은 금액을 쓰는 경우가 많고, 시세가 없는 집은 은행 감정가를 써요. 은행마다 기준이 조금씩 달라요.</li>
+      <li>필요한 돈: 무주택자가 집 1채를 사는 기준이에요. 취득세 6억 이하 1%, 6~9억 구간별 1~3%, 9억 초과 3%이고 지방교육세는 취득세의 10%, 85㎡ 초과면 농어촌특별세 0.2%가 붙어요. 이미 집이 있으면 세율이 달라질 수 있어요.</li>
+      <li>중개수수료는 법정 최대 요율(2억~9억 0.4% 등)로 계산했고, 등기 비용은 집값의 약 0.2%로 잡은 예상값이에요. 법무사 견적을 받으면 그 금액으로 바꿔 넣으세요.</li>
       <li>방공제(소액임차보증금 차감), 신용점수, 은행별 심사, 디딤돌·보금자리론 같은 정책대출 한도는 반영하지 않았어요.</li>
       <li>규제는 자주 바뀌어요. 실제 한도는 꼭 은행 상담으로 확인하세요.</li>
     </ul>
@@ -392,7 +461,7 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   }
 
   function select(i){
-    [['t1','p1'],['t2','p2']].forEach(([t,p],k)=>{
+    [['t1','p1'],['t2','p2'],['t3','p3']].forEach(([t,p],k)=>{
       $(t).setAttribute('aria-selected', k===i ? 'true':'false');
       $(p).hidden = k!==i;
     });
@@ -414,8 +483,66 @@ footer{font-size:12px;color:var(--faint);text-align:center;display:grid;gap:4px}
   $('p2').addEventListener('input', calcPay);
   $('p2').addEventListener('change', calcPay);
 
-  calcLimit(); calcPay();
-  try{ if (localStorage.getItem('loan-tab') === '1') select(1); }catch(e){}
+  // ③ 필요한 돈
+  const touched = {};
+  ['price3','loan3','legal3'].forEach(id=>$(id).addEventListener('input', ()=>{ touched[id]=true; }));
+  function syncCash(){
+    if (!touched.price3) $('price3').value = num($('price')).toLocaleString('ko-KR');
+    if (!touched.loan3) $('loan3').value = lastLimit.toLocaleString('ko-KR');
+    if (!touched.legal3) $('legal3').value = Math.round(num($('price3'))*0.002).toLocaleString('ko-KR');
+  }
+  function calcCash(){
+    const price = num($('price3')), loan = Math.min(num($('loan3')), price);
+    const big = radio('area') === '1', dis = radio('fdis') === '1', vat = radio('vat') === '1';
+    const legal = num($('legal3')), move = num($('move3'));
+    $('price3-r').textContent = price ? won(price) : '';
+    $('loan3-r').textContent = loan ? won(loan) : '';
+
+    // 취득세 (무주택자 1주택 기준): 6억 이하 1%, 6~9억 (가액/억 x 2/3 - 3)%, 9억 초과 3%
+    let rate = price <= 60000 ? 1 : price <= 90000 ? (price/10000*2/3 - 3) : 3;
+    rate = Math.round(rate*100)/100;
+    const tax = price*rate/100;
+    const edu = tax*0.1;
+    const disc = (dis && price <= 120000) ? Math.min(200, tax) : 0;
+    const agri = big ? price*0.002 : 0;
+
+    // 중개수수료 상한 (매매)
+    let fr, fcap = Infinity;
+    if (price < 5000){ fr=0.6; fcap=25; } else if (price < 20000){ fr=0.5; fcap=80; }
+    else if (price < 90000) fr=0.4; else if (price < 120000) fr=0.5; else if (price < 150000) fr=0.6; else fr=0.7;
+    let fee = Math.min(price*fr/100, fcap); if (vat) fee *= 1.1;
+
+    // 인지세: 매매계약서(1억 이하 주택 면제) + 대출 약정서(은행과 반반)
+    const st1 = price <= 10000 ? 0 : price <= 100000 ? 15 : 35;
+    const st2 = loan <= 5000 ? 0 : loan <= 10000 ? 3.5 : loan <= 100000 ? 7.5 : 17.5;
+    const stamp = st1 + st2;
+
+    const own = price - loan;
+    const extra = tax - disc + edu + agri + fee + stamp + legal + move;
+    const total = own + extra;
+
+    $('cash').textContent = won(Math.ceil(total));
+    $('cash-sub').textContent = '집값 외 부대비용만 '+won(Math.ceil(extra))+' 들어요';
+    $('c-own').textContent = won(own);
+    $('c-taxp').textContent = '('+rate+'%)';
+    $('c-tax').textContent = won(tax);
+    $('c-dis-l').hidden = !disc; $('c-dis').textContent = '− '+won(disc);
+    $('c-edu').textContent = won(edu);
+    $('c-agri-l').hidden = !agri; $('c-agri').textContent = won(agri);
+    $('c-feep').textContent = '(최대 '+fr+'%'+(vat?' + 부가세':'')+')';
+    $('c-fee').textContent = won(fee);
+    $('c-stamp').textContent = won(stamp);
+    $('c-legal').textContent = won(legal);
+    $('c-move').textContent = won(move);
+    $('cash-note').innerHTML = '<b>계약금</b>은 보통 집값의 10%(약 '+won(price*0.1)+')를 계약할 때 먼저 내요. 취득세는 잔금일로부터 <b>60일 안</b>에 신고·납부해야 하고, 중개수수료는 최대 요율이라 협의로 낮출 수 있어요.';
+  }
+  $('p3').addEventListener('input', calcCash);
+  $('p3').addEventListener('change', calcCash);
+  $('go3').addEventListener('click', ()=>{ touched.price3=false; touched.loan3=false; touched.legal3=false; syncCash(); calcCash(); select(2); window.scrollTo({top:0, behavior:'smooth'}); });
+  $('t3').addEventListener('click', ()=>{ syncCash(); calcCash(); select(2); });
+
+  calcLimit(); calcPay(); syncCash(); calcCash();
+  try{ const t = localStorage.getItem('loan-tab'); if (t === '1' || t === '2') select(+t); }catch(e){}
 })();
 </script>
 
