@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="질문 10개에 예/아니오로 답하면 지금 혼인신고를 할지 미룰지 알려주는 자가진단 테스트.">
+<meta property="og:title" content="혼인신고, 지금 할까 말까?">
+<meta property="og:description" content="대출·청약·세금·건강보험 기준으로 10문항 체크하고 결과 도장 받기.">
+<title>혼인신고 할까 말까</title>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Gowun+Batang:wght@700&display=swap">
+<style>
+/* 레이아웃: 관공서 신고서 한 장. 질문은 한 칸씩, 결과는 붉은 도장으로 찍힌다. 넝쿨이네 버터 옐로 팔레트 */
+:root{
+  --paper:#fffbec; --sheet:#ffffff; --ink:#2a2414; --muted:#6b6250;
+  --rule:#f1e8c8; --stamp:#c43a26; --hold:#8f6d12; --soft:#fdf3cf;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1c1912; --sheet:#262218; --ink:#f3ecd9; --muted:#c5bb9f;
+  --rule:#3a3426; --stamp:#ef6f58; --hold:#f0cf6b; --soft:#3a3220; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#1c1912; --sheet:#262218; --ink:#f3ecd9; --muted:#c5bb9f;
+  --rule:#3a3426; --stamp:#ef6f58; --hold:#f0cf6b; --soft:#3a3220; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 40px}
+.sheet{max-width:440px;margin:0 auto;background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:24px 20px 28px;position:relative}
+.formhead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px;gap:8px}
+.formhead .no{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.formhead .kind{font-size:12px;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.25;margin:20px 0 8px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 20px}
+.meta{display:grid;grid-template-columns:auto 1fr;border-top:1px solid var(--rule);font-size:14px}
+.meta div{padding:8px 10px;border-bottom:1px solid var(--rule)}
+.meta div:nth-child(odd){background:var(--soft);color:var(--muted)}
+button{font:inherit;cursor:pointer}
+.primary{display:block;width:100%;margin-top:24px;padding:16px;border:0;border-radius:4px;background:var(--ink);color:var(--sheet);font-size:17px;font-weight:700}
+.primary:focus-visible,.opt:focus-visible,.ghost:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+.progress{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:16px;font-variant-numeric:tabular-nums}
+.bar{height:4px;background:var(--soft);margin-top:6px;border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--stamp);transition:width .25s}
+.qlabel{font-size:13px;color:var(--stamp);letter-spacing:.06em;margin-top:24px}
+.q{font-family:var(--display);font-size:22px;line-height:1.45;margin:6px 0 6px;text-wrap:balance;min-height:3em}
+.hint{font-size:14px;color:var(--muted);margin:0 0 20px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:4px;font-size:16px}
+.opt .box{flex:none;width:22px;height:22px;border:1.5px solid var(--ink);border-radius:2px;display:grid;place-items:center;font-size:15px;line-height:1}
+.opt:hover{border-color:var(--ink)}
+.opt.on{border-color:var(--stamp)}
+.opt.on .box{border-color:var(--stamp);color:var(--stamp)}
+.ghost{background:none;border:0;color:var(--muted);padding:8px 0;margin-top:14px;font-size:14px;text-decoration:underline}
+.stampwrap{display:grid;place-items:center;margin:20px 0 8px}
+.stamp{width:150px;height:150px;border-radius:50%;border:5px solid currentColor;display:grid;place-items:center;text-align:center;font-family:var(--display);font-weight:700;transform:rotate(-12deg);position:relative}
+.stamp::after{content:"";position:absolute;inset:7px;border:1.5px solid currentColor;border-radius:50%}
+.stamp b{font-size:40px;line-height:1;display:block}
+.stamp small{font-size:12px;letter-spacing:.12em;display:block;margin-top:6px}
+.go{color:var(--stamp)} .wait{color:var(--hold)}
+@media (prefers-reduced-motion:no-preference){.stamp.anim{animation:thump .45s cubic-bezier(.2,1.6,.4,1)}}
+@keyframes thump{from{transform:rotate(-12deg) scale(1.6);opacity:.3}to{transform:rotate(-12deg) scale(1);opacity:1}}
+.verdict{font-family:var(--display);font-size:26px;text-align:center;margin:12px 0 4px;text-wrap:balance}
+.sub{text-align:center;color:var(--muted);margin:0 0 20px}
+.score{display:flex;gap:8px;margin:0 0 18px}
+.score div{flex:1;border:1px solid var(--rule);padding:10px;text-align:center;border-radius:4px}
+.score span{display:block;font-size:12px;color:var(--muted)}
+.score strong{font-size:22px;font-variant-numeric:tabular-nums}
+h2{font-size:15px;margin:18px 0 8px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+ul.why{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.why li{font-size:15px;padding-left:22px;position:relative}
+ul.why li::before{position:absolute;left:0;top:0;font-weight:700}
+ul.why li.p::before{content:"＋";color:var(--stamp)}
+ul.why li.m::before{content:"－";color:var(--hold)}
+.note{font-size:12px;color:var(--muted);margin-top:22px;border-top:1px dashed var(--rule);padding-top:12px}
+.row{display:flex;gap:10px;margin-top:20px}
+.row button{flex:1;padding:14px;border-radius:4px;font-size:15px}
+.row .a{background:var(--ink);color:var(--sheet);border:0}
+.row .b{background:none;color:var(--ink);border:1px solid var(--ink)}
+.toast{text-align:center;font-size:13px;color:var(--muted);min-height:1.4em;margin-top:8px}
+</style>
+</head>
+<body>
+
+<main class="sheet" id="app"></main>
+
+<script>
+const Q=[
+ {t:"결혼식을 했거나 날짜가 잡혔고, 곧 같이 살 집을 구한다",h:"이미 생활은 부부인데 서류만 안 한 상태라면 미룰 이유가 줄어요.",y:2,why:"생활은 이미 부부라 서류를 미룰 실익이 작아요."},
+ {t:"1~2년 안에 신혼부부 전용 대출(디딤돌·버팀목 등)을 받을 생각이다",h:"신혼부부 전용 상품은 대부분 혼인신고(또는 예정) 증빙이 필요해요.",y:3,why:"신혼부부 전용 대출은 혼인신고가 사실상 입장권이에요."},
+ {t:"1~2년 안에 아이 계획이 있거나, 지금 임신 중이다",h:"신생아 특례대출·출생 관련 지원은 부부 기준으로 서류가 훨씬 간단해요.",y:3,why:"출산 계획이 있으면 신생아 특례 등 부부 기준 혜택이 커요."},
+ {t:"둘 다 소득세를 내는 직장인이고, 2026년 안에 신고할 수 있다",h:"결혼세액공제(1인 50만원, 생애 1회)는 2024~2026년 혼인신고분이 대상이에요.",y:2,why:"올해 안에 신고하면 결혼세액공제를 챙길 수 있어요."},
+ {t:"소득이 없는 쪽이 상대 건강보험 피부양자로 들어가야 한다",h:"법적 배우자가 되면 피부양자 등록 절차가 훨씬 단순해져요.",y:2,why:"건강보험 피부양자 등록이 간단해져요."},
+ {t:"양가에서 결혼 자금을 증여받을 예정이다",h:"혼인 증여재산공제(최대 1억)는 혼인신고일 전후 2년 안에 받아야 적용돼요.",y:1,why:"혼인 증여공제는 신고일 기준이라 날짜를 잡아두는 게 유리해요."},
+ {t:"한 명은 무주택으로 청약을 노리는데, 상대는 이미 집이 있다",h:"신고하는 순간 세대 전체가 유주택이 되어 무주택 특공 자격이 흔들릴 수 있어요.",y:-3,why:"신고하면 상대 주택 때문에 청약 무주택 자격을 잃을 수 있어요."},
+ {t:"둘 다 각자 명의 집이 한 채씩 있다",h:"혼인 합가 특례가 있지만 처분 시기에 따라 양도세가 달라져서 계산이 먼저예요.",y:-2,why:"각자 집이 있으면 양도세 일정부터 계산해야 해요."},
+ {t:"맞벌이 합산 소득이 높아서 대출·청약 소득 기준을 넘을 것 같다",h:"혼자일 땐 되던 상품이 부부 합산이 되면 기준 초과로 막힐 수 있어요.",y:-2,why:"합산 소득이 기준을 넘으면 혼자일 때보다 손해예요."},
+ {t:"아직 서로의 빚·신용점수·재정 상황을 다 털어놓지 못했다",h:"혼인신고는 돈 문제를 함께 지는 시작점이에요. 서류보다 대화가 먼저예요.",y:-2,why:"재정 공유가 아직이면 서류보다 대화가 먼저예요."}
+];
+const app=document.getElementById('app');
+let i=0,ans=[];
+
+function intro(){
+ app.innerHTML=`
+ <div class="formhead"><span class="no">자가진단 제 2026-10호</span><span class="kind">신고 전 확인서</span></div>
+ <h1>혼인신고,<br>지금 할까 말까?</h1>
+ <p class="lead">질문 10개에 예/아니오로 체크하면, 지금 신고하는 게 유리한지 조금 미루는 게 나은지 도장으로 알려드려요.</p>
+ <div class="meta"><div>문항</div><div>10개 · 약 1분</div><div>기준</div><div>대출 · 청약 · 세금 · 건강보험</div><div>결과</div><div>지금 신고 / 잠깐 보류</div></div>
+ <button class="primary" id="start">체크 시작하기</button>`;
+ document.getElementById('start').onclick=()=>{i=0;ans=[];ask()};
+}
+
+function ask(){
+ const q=Q[i];
+ app.innerHTML=`
+ <div class="formhead"><span class="no">혼인신고 자가진단</span><span class="kind">${i+1} / ${Q.length}</span></div>
+ <div class="bar"><i style="width:${(i/Q.length)*100}%"></i></div>
+ <div class="qlabel">문항 ${String(i+1).padStart(2,'0')}</div>
+ <p class="q">${q.t}</p>
+ <p class="hint">${q.h}</p>
+ <div class="opts">
+  <button class="opt" data-v="1" id="o-yes"><span class="box"></span>예, 해당돼요</button>
+  <button class="opt" data-v="0" id="o-no"><span class="box"></span>아니요</button>
+ </div>
+ ${i>0?'<button class="ghost" id="back">이전 문항</button>':''}`;
+ app.querySelectorAll('.opt').forEach(b=>{
+  if(ans[i]!==undefined && +b.dataset.v===ans[i]) b.classList.add('on'),b.querySelector('.box').textContent='✓';
+  b.onclick=()=>{
+   app.querySelectorAll('.opt').forEach(x=>{x.classList.remove('on');x.querySelector('.box').textContent=''});
+   b.classList.add('on');b.querySelector('.box').textContent='✓';
+   ans[i]=+b.dataset.v;
+   setTimeout(()=>{i++; i<Q.length?ask():result()},220);
+  };
+ });
+ const bk=document.getElementById('back'); if(bk) bk.onclick=()=>{i--;ask()};
+}
+
+function result(){
+ let plus=0,minus=0,pros=[],cons=[];
+ Q.forEach((q,k)=>{ if(ans[k]===1){ if(q.y>0){plus+=q.y;pros.push(q.why)} else {minus+=-q.y;cons.push(q.why)} } });
+ const go = plus-minus>=2 || (plus>0 && minus===0);
+ const v = go
+  ? {cls:'go',big:'신고',small:'지금 하세요',title:'지금 혼인신고 하는 게 유리해요',sub:'미룰수록 받을 수 있는 혜택을 놓치는 쪽이에요.'}
+  : {cls:'wait',big:'보류',small:'잠깐 멈춤',title:'아직은 미루는 게 나아요',sub:'신고 전에 계산하거나 정리할 것이 남아 있어요.'};
+ if(!go && plus===0 && minus===0){v.title='급하게 할 이유는 없어요';v.sub='신고로 바로 얻는 혜택이 아직 뚜렷하지 않아요. 계획이 생기면 다시 체크해보세요.'}
+ app.innerHTML=`
+ <div class="formhead"><span class="no">혼인신고 자가진단 결과</span><span class="kind">처리 완료</span></div>
+ <div class="stampwrap"><div class="stamp anim ${v.cls}"><div><b>${v.big}</b><small>${v.small}</small></div></div></div>
+ <p class="verdict">${v.title}</p>
+ <p class="sub">${v.sub}</p>
+ <div class="score"><div><span>지금 하면 좋은 점</span><strong class="go">${plus}</strong></div><div><span>미루면 좋은 점</span><strong class="wait">${minus}</strong></div></div>
+ ${pros.length?`<h2>지금 하면 좋은 이유</h2><ul class="why">${pros.map(t=>`<li class="p">${t}</li>`).join('')}</ul>`:''}
+ ${cons.length?`<h2>먼저 확인할 것</h2><ul class="why">${cons.map(t=>`<li class="m">${t}</li>`).join('')}</ul>`:''}
+ <div class="row"><button class="b" id="again">다시 하기</button><button class="a" id="copy">결과 복사</button></div>
+ <p class="toast" id="toast"></p>
+ <p class="note">재미로 보는 자가진단이에요. 대출·청약 소득 기준과 세법은 해마다 바뀌니, 실제 신고 전에는 주택도시기금·청약홈·국세청에서 최신 기준을 꼭 확인하세요.</p>`;
+ document.getElementById('again').onclick=intro;
+ document.getElementById('copy').onclick=()=>{
+  const txt=`[혼인신고 자가진단] ${v.title} (지금 하면 좋은 점 ${plus} : 미루면 좋은 점 ${minus})`;
+  const t=document.getElementById('toast');
+  try{navigator.clipboard.writeText(txt).then(()=>t.textContent='복사했어요',()=>t.textContent=txt)}catch(e){t.textContent=txt}
+ };
+}
+intro();
+</script>
+</body>
+</html>
