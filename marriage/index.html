@@ -138,10 +138,10 @@ function ask(){
 function result(){
  let plus=0,minus=0,pros=[],cons=[];
  Q.forEach((q,k)=>{ if(ans[k]===1){ if(q.y>0){plus+=q.y;pros.push(q.why)} else {minus+=-q.y;cons.push(q.why)} } });
- const go = plus-minus>=2 || (plus>0 && minus===0);
+ const go = plus>0 && minus===0; // 불리한 조건이 하나라도 있으면 보류
  const v = go
   ? {cls:'go',big:'신고',small:'지금 하세요',title:'지금 혼인신고 하는 게 유리해요',sub:'미룰수록 받을 수 있는 혜택을 놓치는 쪽이에요.'}
-  : {cls:'wait',big:'보류',small:'잠깐 멈춤',title:'아직은 미루는 게 나아요',sub:'신고 전에 계산하거나 정리할 것이 남아 있어요.'};
+  : {cls:'wait',big:'보류',small:'잠깐 멈춤',title:'아직은 미루는 게 나아요',sub:'혜택이 있어도 불리한 조건이 하나라도 있으면 애매해요. 아래 항목부터 정리하고 다시 체크해보세요.'};
  if(!go && plus===0 && minus===0){v.title='급하게 할 이유는 없어요';v.sub='신고로 바로 얻는 혜택이 아직 뚜렷하지 않아요. 계획이 생기면 다시 체크해보세요.'}
  app.innerHTML=`
  <div class="formhead"><span class="no">혼인신고 자가진단 결과</span><span class="kind">처리 완료</span></div>
