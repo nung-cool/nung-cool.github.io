@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>희넝이네 인스타툰</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one 4:5 Instagram slide on top (drag things on it), slide strip, editor, sticky save bar */
+:root {
+  --bg: #f6f1f4; --card: #ffffff; --fg: #2a2b26; --muted: #6f6a70; --accent: #e0607e; --line: #e6dde3;
+  --f-pixel: "DotGothic16", "Gowun Dodum", system-ui, sans-serif; --f-body: "Gowun Dodum", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root { --bg: #1e1b1f; --card: #2b272c; --fg: #f1edf0; --muted: #b0a8ae; --accent: #f08aa2; --line: #3d373e; color-scheme: dark } }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.app { max-width: 520px; margin: 0 auto; padding-block: calc(16px + env(safe-area-inset-top, 0px)) 110px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: var(--f-pixel); font-weight: 400; font-size: 22px; margin: 0; }
+.muted { color: var(--muted); font-size: 13px; margin: 0; }
+canvas#cv { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; border-radius: 10px; box-shadow: 0 0 0 2px var(--fg); touch-action: none; background: #fff; }
+.strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px; }
+.strip button { flex: none; width: 54px; aspect-ratio: 4 / 5; border-radius: 6px; border: 2px solid var(--line); padding: 0; cursor: pointer; font-family: var(--f-pixel); font-size: 16px; color: var(--fg); }
+.strip button.on { border-color: var(--fg); box-shadow: 0 0 0 2px var(--accent); }
+.strip button.add { background: var(--card); border-style: dashed; font-size: 22px; }
+.box { background: var(--card); border: 2px solid var(--fg); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.box h2 { font-family: var(--f-pixel); font-weight: 400; font-size: 16px; margin: 0; display: flex; justify-content: space-between; align-items: center; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
+.sw.on { border-color: var(--fg); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--fg); }
+.chip { font: inherit; font-size: 14px; border: 2px solid var(--fg); background: var(--card); color: var(--fg); border-radius: 999px; padding: 4px 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip img { height: 26px; width: auto; }
+.chip.ghost { border-color: var(--line); }
+.chip.warn { color: var(--accent); border-color: var(--accent); }
+input[type=text], textarea { font: inherit; color: var(--fg); background: var(--bg); border: 2px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
+textarea { min-height: 56px; resize: vertical; }
+.sel { border-top: 2px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.btn { font-family: var(--f-pixel); font-size: 15px; background: var(--accent); color: #fff; border: 2px solid var(--fg); border-radius: 8px; padding: 7px 14px; cursor: pointer; box-shadow: 2px 2px 0 var(--fg); }
+.btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.btn.ghost { background: var(--card); color: var(--fg); }
+.save { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 2px solid var(--line); z-index: 5;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.save div { max-width: 520px; margin: 0 auto; display: flex; gap: 8px; justify-content: space-between; align-items: center; }
+.sheet { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 10; overflow-y: auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 40px; }
+.sheet .in { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.sheet img { width: 100%; border-radius: 8px; background: #fff; }
+.sheet p { color: #fff; margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div><h1>희넝이네 인스타툰</h1><p class="muted">한 장 = 한 컷 (인스타 4:5 세로). 캐릭터를 올리고 손가락으로 끌어 옮겨요.</p></div>
+
+  <canvas id="cv" width="1080" height="1350" aria-label="지금 만드는 컷"></canvas>
+
+  <div class="strip" id="strip" aria-label="컷 목록"></div>
+
+  <section class="box">
+    <h2><span id="ed-title">1컷</span><span class="row"><button class="chip ghost" type="button" id="dup">복사</button><button class="chip ghost" type="button" id="del-slide">이 컷 삭제</button></span></h2>
+    <div class="row" id="bgs" aria-label="배경 색"></div>
+    <label class="muted" for="narr">장면 설명 (위쪽 글씨, 선택)</label>
+    <input type="text" id="narr" maxlength="30" placeholder="예: 월급날 저녁">
+    <div class="muted">캐릭터 올리기</div>
+    <div class="row" id="adds"></div>
+    <div class="row">
+      <button class="chip ghost" type="button" id="add-bub">＋ 말풍선</button>
+      <label class="chip ghost" for="up">＋ 내 그림 올리기</label>
+      <input type="file" id="up" accept="image/*" hidden>
+    </div>
+    <div class="sel" id="sel" hidden>
+      <div class="muted" id="sel-name"></div>
+      <textarea id="bub-text" maxlength="80" placeholder="대사를 입력하세요" hidden></textarea>
+      <div class="row">
+        <button class="chip" type="button" data-act="smaller">작게</button>
+        <button class="chip" type="button" data-act="bigger">크게</button>
+        <button class="chip" type="button" data-act="flip" id="flip">좌우 뒤집기</button>
+        <button class="chip" type="button" data-act="front">맨 앞으로</button>
+        <button class="chip warn" type="button" data-act="del">삭제</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="box">
+    <h2>내 그림 정리 · 처음부터</h2>
+    <p class="muted">올린 내 그림은 이 폰에만 저장돼요. 지금 만든 컷을 전부 지우려면 아래를 두 번 누르세요.</p>
+    <div class="row" id="mine"></div>
+    <button class="btn ghost" type="button" id="reset" style="align-self:flex-start">컷 전부 지우기</button>
+  </section>
+</div>
+
+<div class="save"><div><span class="muted" id="count"></span><button class="btn" type="button" id="save">인스타용 저장</button></div></div>
+<div class="sheet" id="sheet" hidden><div class="in">
+  <p id="sheet-tip">공유하기를 누르면 인스타그램으로 바로 보낼 수 있어요. 안 되면 아래 그림을 하나씩 길게 눌러 사진에 저장하세요.</p>
+  <div class="row"><button class="btn" type="button" id="share">공유하기 (인스타)</button><button class="btn ghost" type="button" id="close">닫기</button></div>
+  <div id="outs" style="display:flex;flex-direction:column;gap:12px"></div>
+</div></div>
+
+<script>
+const W = 1080, H = 1350, MAX = 10;
+const BGS = ['#fdf3f6', '#cfe6ff', '#cfe0b4', '#fdf3cf', '#ffffff', '#2d3a5c'];
+const BUILTIN = { gwan: { name: '관이', src: 'img/gwan.png', h: 760 }, neong: { name: '넝이', src: 'img/neong.png', h: 517 }, baby: { name: '선물이', src: 'img/baby.png', h: 340 } };
+const $ = id => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } } };
+
+const blankSlide = () => ({ bg: 0, narr: '', items: [] });
+let slides = [blankSlide()], cur = 0, sel = null, customs = {};
+try { const s = JSON.parse(store.get('insta-slides')); if (Array.isArray(s) && s.length) slides = s; } catch (e) {}
+try { customs = JSON.parse(store.get('insta-customs')) || {}; } catch (e) {}
+const save = () => store.set('insta-slides', JSON.stringify(slides, (k, v) => k === '_box' ? undefined : v));
+
+const images = {};
+function img(id) {
+  if (images[id]) return images[id];
+  const src = BUILTIN[id] ? BUILTIN[id].src : customs[id]?.data;
+  if (!src) return null;
+  const im = new Image(); im.onload = () => draw(); im.src = src; images[id] = im; return im;
+}
+
+/* ---------- drawing ---------- */
+const cv = $('cv'), ctx = cv.getContext('2d');
+function wrap(c, text, maxW) {
+  const out = []; let line = '';
+  for (const ch of text) { if (ch === '\n') { out.push(line); line = ''; continue; } const t = line + ch; if (c.measureText(t).width > maxW && line) { out.push(line); line = ch; } else line = t; }
+  if (line) out.push(line); return out.length ? out : [''];
+}
+function paint(c, s, selected) {
+  c.fillStyle = BGS[s.bg] || '#fff'; c.fillRect(0, 0, W, H);
+  c.fillStyle = 'rgba(0,0,0,.05)'; c.fillRect(0, H * 0.8, W, H * 0.2);
+  for (const it of s.items) {
+    if (it.kind === 'char') {
+      const im = img(it.id); if (!im || !im.complete || !im.naturalWidth) continue;
+      const h = it.h * it.s, w = im.naturalWidth * h / im.naturalHeight;
+      c.save(); c.translate(it.x, it.y); if (it.flip) c.scale(-1, 1); c.drawImage(im, -w / 2, -h, w, h); c.restore();
+      it._box = [it.x - w / 2, it.y - h, w, h];
+    } else {
+      c.font = '48px "Gowun Dodum", sans-serif';
+      const lines = wrap(c, it.text || '…', 600), lw = Math.max(...lines.map(l => c.measureText(l).width));
+      const w = lw + 70, h = lines.length * 64 + 44, x = it.x - w / 2, y = it.y - h;
+      c.fillStyle = '#fff'; c.strokeStyle = '#2a2b26'; c.lineWidth = 6;
+      c.beginPath(); c.roundRect(x, y, w, h, 36); c.fill(); c.stroke();
+      const tx = it.x + (it.tail || 0) * 50;
+      c.beginPath(); c.moveTo(tx - 22, y + h - 3); c.lineTo(tx + 6, y + h + 42); c.lineTo(tx + 22, y + h - 3); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(tx - 22, y + h); c.lineTo(tx + 6, y + h + 42); c.lineTo(tx + 22, y + h); c.stroke();
+      c.fillStyle = '#2a2b26'; c.textAlign = 'center'; c.textBaseline = 'top';
+      lines.forEach((l, i) => c.fillText(l, it.x, y + 24 + i * 64));
+      it._box = [x, y, w, h + 42];
+    }
+    if (selected === it) { const b = it._box; c.setLineDash([16, 12]); c.strokeStyle = '#e0607e'; c.lineWidth = 6; c.strokeRect(b[0] - 10, b[1] - 10, b[2] + 20, b[3] + 20); c.setLineDash([]); }
+  }
+  if (s.narr) {
+    c.font = '44px "Gowun Dodum", sans-serif'; const tw = c.measureText(s.narr).width;
+    c.fillStyle = '#fffbe8'; c.strokeStyle = '#2a2b26'; c.lineWidth = 5;
+    c.fillRect(40, 40, tw + 48, 76); c.strokeRect(40, 40, tw + 48, 76);
+    c.fillStyle = '#2a2b26'; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(s.narr, 64, 79);
+  }
+}
+function draw() { paint(ctx, slides[cur], sel); }
+
+/* ---------- editor ---------- */
+function renderEditor() {
+  $('strip').innerHTML = slides.map((s, i) => `<button type="button" class="${i === cur ? 'on' : ''}" data-s="${i}" style="background:${BGS[s.bg]};color:${s.bg === 5 ? '#fff' : '#2a2b26'}" aria-label="${i + 1}컷">${i + 1}</button>`).join('') + (slides.length < MAX ? '<button type="button" class="add" id="add-slide" aria-label="컷 추가">＋</button>' : '');
+  $('ed-title').textContent = (cur + 1) + '컷';
+  $('count').textContent = `${slides.length}컷 · 폰에 자동 저장돼요`;
+  const s = slides[cur];
+  $('bgs').innerHTML = BGS.map((c, i) => `<button type="button" class="sw ${s.bg === i ? 'on' : ''}" data-bg="${i}" style="background:${c}" aria-label="배경 ${i + 1}"></button>`).join('');
+  $('narr').value = s.narr;
+  const list = [...Object.entries(BUILTIN).map(([k, v]) => [k, v.name, v.src]), ...Object.entries(customs).map(([k, v]) => [k, v.name, v.data])];
+  $('adds').innerHTML = list.map(([k, n, src]) => `<button type="button" class="chip" data-add="${k}"><img src="${src}" alt="">${n}</button>`).join('');
+  $('mine').innerHTML = Object.entries(customs).map(([k, v]) => `<button type="button" class="chip warn" data-rmc="${k}"><img src="${v.data}" alt="">${v.name} 지우기</button>`).join('') || '<span class="muted">아직 올린 그림이 없어요.</span>';
+  $('del-slide').hidden = slides.length < 2;
+  $('sel').hidden = !sel;
+  if (sel) {
+    const isB = sel.kind === 'bub';
+    $('sel-name').textContent = isB ? '고른 말풍선' : '고른 캐릭터: ' + (BUILTIN[sel.id]?.name || customs[sel.id]?.name || '');
+    $('bub-text').hidden = !isB; if (isB) $('bub-text').value = sel.text;
+    $('flip').textContent = isB ? '꼬리 방향' : '좌우 뒤집기';
+  }
+}
+function update() { save(); draw(); renderEditor(); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const s = slides[cur];
+  if (t.dataset.s) { cur = +t.dataset.s; sel = null; update(); }
+  else if (t.id === 'add-slide') { slides.push({ ...blankSlide(), bg: s.bg }); cur = slides.length - 1; sel = null; update(); }
+  else if (t.id === 'dup' && slides.length < MAX) { slides.splice(cur + 1, 0, JSON.parse(JSON.stringify(s, (k, v) => k === '_box' ? undefined : v))); cur++; sel = null; update(); }
+  else if (t.id === 'del-slide') {
+    if (!t.dataset.armed) { t.dataset.armed = '1'; t.textContent = '한 번 더 누르면 삭제'; setTimeout(() => { delete t.dataset.armed; t.textContent = '이 컷 삭제'; }, 3000); return; }
+    delete t.dataset.armed; t.textContent = '이 컷 삭제'; slides.splice(cur, 1); cur = Math.max(0, cur - 1); sel = null; update();
+  }
+  else if (t.dataset.bg) { s.bg = +t.dataset.bg; update(); }
+  else if (t.dataset.add) {
+    const id = t.dataset.add, n = s.items.filter(x => x.kind === 'char').length;
+    const it = { kind: 'char', id, h: BUILTIN[id]?.h || 600, s: 1, x: 300 + (n % 3) * 240, y: H * 0.93, flip: false };
+    s.items.push(it); sel = it; update();
+  }
+  else if (t.id === 'add-bub') { const it = { kind: 'bub', text: '', x: W / 2, y: 380, tail: 0 }; s.items.push(it); sel = it; update(); $('bub-text').focus(); }
+  else if (t.dataset.act && sel) {
+    const a = t.dataset.act;
+    if (a === 'smaller' || a === 'bigger') { if (sel.kind === 'char') sel.s = Math.min(2.5, Math.max(0.3, sel.s * (a === 'bigger' ? 1.15 : 0.87))); }
+    if (a === 'flip') { if (sel.kind === 'char') sel.flip = !sel.flip; else sel.tail = sel.tail === -3 ? 3 : sel.tail === 3 ? 0 : -3; }
+    if (a === 'front') { s.items = s.items.filter(x => x !== sel); s.items.push(sel); }
+    if (a === 'del') { s.items = s.items.filter(x => x !== sel); sel = null; }
+    update();
+  }
+  else if (t.dataset.rmc) {
+    const id = t.dataset.rmc;
+    if (!t.dataset.armed) { t.dataset.armed = '1'; t.textContent = '한 번 더 누르면 지워져요'; setTimeout(() => renderEditor(), 3000); return; }
+    delete customs[id]; delete images[id]; store.set('insta-customs', JSON.stringify(customs));
+    slides.forEach(sl => sl.items = sl.items.filter(x => x.id !== id)); sel = null; update();
+  }
+  else if (t.id === 'reset') {
+    if (!t.dataset.armed) { t.dataset.armed = '1'; t.textContent = '한 번 더 누르면 지워져요'; setTimeout(() => { delete t.dataset.armed; t.textContent = '컷 전부 지우기'; }, 3000); return; }
+    slides = [blankSlide()]; cur = 0; sel = null; delete t.dataset.armed; t.textContent = '컷 전부 지우기'; update();
+  }
+});
+$('narr').addEventListener('input', e => { slides[cur].narr = e.target.value; save(); draw(); });
+$('bub-text').addEventListener('input', e => { if (sel && sel.kind === 'bub') { sel.text = e.target.value; save(); draw(); } });
+
+/* ---------- dragging ---------- */
+let drag = null;
+function pt(e) { const r = cv.getBoundingClientRect(); const k = W / r.width; return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k }; }
+cv.addEventListener('pointerdown', e => {
+  const q = pt(e), items = slides[cur].items;
+  const hit = [...items].reverse().find(it => it._box && q.x >= it._box[0] && q.x <= it._box[0] + it._box[2] && q.y >= it._box[1] && q.y <= it._box[1] + it._box[3]);
+  sel = hit || null;
+  if (hit) { drag = { it: hit, dx: hit.x - q.x, dy: hit.y - q.y }; cv.setPointerCapture(e.pointerId); }
+  draw(); renderEditor();
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return; const q = pt(e);
+  drag.it.x = Math.min(W, Math.max(0, q.x + drag.dx)); drag.it.y = Math.min(H + 60, Math.max(60, q.y + drag.dy)); draw();
+});
+['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { if (drag) { drag = null; save(); } }));
+
+/* ---------- upload own picture, remove its plain background ---------- */
+$('up').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const HH = 520, w0 = Math.max(1, Math.round(im.naturalWidth * HH / im.naturalHeight));
+      const c = document.createElement('canvas'); c.width = w0; c.height = HH; const x = c.getContext('2d'); x.drawImage(im, 0, 0, w0, HH);
+      const d = x.getImageData(0, 0, w0, HH), a = d.data, bg = [a[0], a[1], a[2]];
+      const near = i => Math.abs(a[i] - bg[0]) + Math.abs(a[i + 1] - bg[1]) + Math.abs(a[i + 2] - bg[2]) < 40;
+      const seen = new Uint8Array(w0 * HH), st = [];
+      for (let i = 0; i < w0; i++) st.push(i, (HH - 1) * w0 + i);
+      for (let j = 0; j < HH; j++) st.push(j * w0, j * w0 + w0 - 1);
+      while (st.length) { const p = st.pop(); if (seen[p]) continue; seen[p] = 1; if (!near(p * 4)) continue; a[p * 4 + 3] = 0; const px = p % w0, py = (p / w0) | 0;
+        if (px > 0) st.push(p - 1); if (px < w0 - 1) st.push(p + 1); if (py > 0) st.push(p - w0); if (py < HH - 1) st.push(p + w0); }
+      x.putImageData(d, 0, 0);
+      let minX = w0, minY = HH, maxX = 0, maxY = 0;
+      for (let p = 0; p < w0 * HH; p++) if (a[p * 4 + 3]) { const px = p % w0, py = (p / w0) | 0; if (px < minX) minX = px; if (px > maxX) maxX = px; if (py < minY) minY = py; if (py > maxY) maxY = py; }
+      if (maxX < minX) { minX = 0; minY = 0; maxX = w0 - 1; maxY = HH - 1; }
+      const t = document.createElement('canvas'); t.width = maxX - minX + 1; t.height = maxY - minY + 1;
+      t.getContext('2d').drawImage(c, minX, minY, t.width, t.height, 0, 0, t.width, t.height);
+      const id = 'c' + Date.now(), n = Object.keys(customs).length + 1;
+      customs[id] = { name: '내 그림 ' + n, data: t.toDataURL('image/png') };
+      if (!store.set('insta-customs', JSON.stringify(customs))) { delete customs[id]; showMsg('폰 저장 공간이 꽉 찼어요. 아래에서 올린 그림을 몇 개 지워 주세요.'); return; }
+      const it = { kind: 'char', id, h: 620, s: 1, x: W / 2, y: H * 0.93, flip: false };
+      slides[cur].items.push(it); sel = it; update();
+    };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f); e.target.value = '';
+});
+function showMsg(m) { $('sheet-tip').textContent = m; $('share').hidden = true; $('outs').innerHTML = ''; $('sheet').hidden = false; }
+
+/* ---------- export every slide as its own 1080x1350 image ---------- */
+let files = [];
+$('save').addEventListener('click', async () => {
+  const off = document.createElement('canvas'); off.width = W; off.height = H; const oc = off.getContext('2d');
+  files = []; $('outs').innerHTML = '';
+  for (let i = 0; i < slides.length; i++) {
+    paint(oc, slides[i], null);
+    const b = await new Promise(r => off.toBlob(r, 'image/png'));
+    files.push(new File([b], `희넝이네-${i + 1}.png`, { type: 'image/png' }));
+    const im = document.createElement('img'); im.src = URL.createObjectURL(b); im.alt = (i + 1) + '컷'; $('outs').appendChild(im);
+  }
+  draw();
+  $('sheet-tip').textContent = '공유하기를 누르면 인스타그램으로 바로 보낼 수 있어요. 안 되면 아래 그림을 하나씩 길게 눌러 사진에 저장하세요.';
+  $('share').hidden = !(navigator.canShare && navigator.canShare({ files }));
+  $('sheet').hidden = false;
+});
+$('share').addEventListener('click', async () => { try { await navigator.share({ files }); } catch (e) {} });
+$('close').addEventListener('click', () => { $('sheet').hidden = true; });
+
+Object.keys(BUILTIN).forEach(img); Object.keys(customs).forEach(img);
+document.fonts.load('48px "Gowun Dodum"').finally(() => draw());
+update();
+</script>
+</body>
+</html>
