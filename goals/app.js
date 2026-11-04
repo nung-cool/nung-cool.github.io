@@ -152,7 +152,7 @@ render();
 (async () => {
   const url = new URL(location.href);
   room = url.searchParams.get('k') || store.get('hn-room');
-  if (room) { store.set('hn-room', room); $('to-toon').href = 'toon.html?k=' + encodeURIComponent(room); }
+  if (room) store.set('hn-room', room);
   if (!room) { $('status').hidden = true; $('keybox').hidden = false; return; }
   if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey) { showErr('아직 저장소 연결 전이에요. 곧 열려요!'); return; }
   const app = initializeApp(FIREBASE_CONFIG);
