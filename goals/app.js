@@ -158,19 +158,22 @@ render();
   const app = initializeApp(FIREBASE_CONFIG);
   fs = getFirestore(app);
   const auth = getAuth(app);
-  const timer = setTimeout(() => showErr('목표를 아직 못 불러왔어요. 인터넷 연결을 확인해 주세요.'), 10000);
-  onAuthStateChanged(auth, async user => {
-    if (!user) return;
-    try { await seedOnce(); } catch (e) { /* not allowed or offline: the listener below reports it */ }
-    onSnapshot(query(collection(fs, 'rooms', room, 'goals'), orderBy('created')), snap => {
+  const timer = setTimeout(() => showErr('저장소에서 답이 없어요. 파이어베이스에서 Firestore Database를 만들었는지 확인해 주세요. (no-response)'), 12000);
+  let subscribed = false;
+  onAuthStateChanged(auth, user => {
+    if (!user || subscribed) return;
+    subscribed = true;
+    onSnapshot(query(collection(fs, 'rooms', room, 'goals'), orderBy('created')), { includeMetadataChanges: true }, snap => {
+      if (snap.metadata.fromCache && !snap.docs.length) return; // wait for the server's answer
       clearTimeout(timer); ready = true;
       goals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (goals.length) $('status').hidden = true;
       else showErr('아직 목표가 없어요. 추가 탭에서 첫 목표를 넣으면 둘이 걷기 시작해요.');
       render();
-    }, err => { clearTimeout(timer); showErr('목표를 불러오지 못했어요. 받은 링크로 다시 들어와 주세요.'); });
+    }, err => { clearTimeout(timer); showErr('목표를 불러오지 못했어요. (' + (err.code || err.message) + ')'); });
+    seedOnce().catch(e => showErr('첫 목표를 넣지 못했어요. (' + (e.code || e.message) + ')'));
   });
-  signInAnonymously(auth).catch(() => { clearTimeout(timer); showErr('접속이 안 됐어요. 잠시 뒤 다시 열어 주세요.'); });
+  signInAnonymously(auth).catch(e => { clearTimeout(timer); showErr('접속이 안 됐어요. (' + (e.code || e.message) + ')'); });
 })();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
