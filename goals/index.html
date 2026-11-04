@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>희넝이네 완주 지도</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="완주 지도">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f5ec">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: phone-first app, one column up to 480px. Three views (map, goals, add) switched by a bottom nav. */
+:root {
+  --bg: #f3f5ec;
+  --card: #ffffff;
+  --fg: #2a2b26;
+  --muted: #6c6f63;
+  --road: #e8dfcb;
+  --road-line: #fffaf0;
+  --grass: #cfe0b4;
+  --accent: #d9534f;
+  --ok: #4f9a63;
+  --line: #dfe2d4;
+  --f-pixel: "DotGothic16", "Gowun Dodum", system-ui, sans-serif;
+  --f-body: "Gowun Dodum", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1d1f1b; --card: #2a2d27; --fg: #eef0e8; --muted: #a8ac9e; --road: #5a5242; --road-line: #7a6f58;
+  --grass: #34412b; --accent: #f07a72; --ok: #7cc48f; --line: #3a3e35; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1d1f1b; --card: #2a2d27; --fg: #eef0e8; --muted: #a8ac9e; --road: #5a5242; --road-line: #7a6f58;
+  --grass: #34412b; --accent: #f07a72; --ok: #7cc48f; --line: #3a3e35; color-scheme: dark }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.app { max-width: 480px; margin: 0 auto; padding-block: calc(18px + env(safe-area-inset-top, 0px)) 96px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: var(--f-pixel); font-weight: 400; font-size: 24px; margin: 0; text-wrap: balance; }
+.muted { color: var(--muted); }
+.notice { background: var(--card); border: 2px dashed var(--line); border-radius: 10px; padding: 10px 14px; color: var(--muted); margin: 0; }
+.view[hidden] { display: none !important; }
+.view { display: flex; flex-direction: column; gap: 12px; }
+
+/* tabs */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.tab { font: inherit; font-size: 13px; border: 2px solid var(--line); border-radius: 999px; padding: 3px 12px; background: var(--card); color: var(--fg); cursor: pointer; white-space: nowrap; }
+.tab.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; color: var(--muted); }
+.big { font-family: var(--f-pixel); font-size: 15px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.big b { color: var(--accent); font-weight: 400; }
+
+/* map */
+.map { position: relative; background: var(--grass); border: 3px solid var(--fg); border-radius: 8px; overflow: hidden; aspect-ratio: 356 / 470; max-width: 100%; }
+.map svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pair { position: absolute; display: flex; align-items: flex-end; transform: translate(-50%, -90%); transition: left 1.2s ease-in-out, top 1.2s ease-in-out; pointer-events: none; }
+.pair img { display: block; animation: hop 1s steps(2) infinite; }
+.pair img.g { height: 88px; }
+.pair img.n { height: 74px; margin-left: -14px; animation-delay: -.5s; }
+@keyframes hop { 50% { transform: translateY(-3px); } }
+@media (max-width: 380px) { .pair img.g { height: 72px; } .pair img.n { height: 61px; } }
+.bubble { position: absolute; font-family: var(--f-pixel); font-size: 12px; background: var(--card); color: var(--fg); border: 2px solid var(--fg); padding: 1px 8px; white-space: nowrap; transform: translate(0, -100%); transition: left 1.2s, top 1.2s; }
+.finish { position: absolute; right: 8px; top: 13%; font-family: var(--f-pixel); font-size: 12px; background: var(--card); border: 2px solid var(--fg); padding: 1px 6px; }
+.cheer { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font-family: var(--f-pixel); font-size: 26px; background: var(--card); border: 3px solid var(--fg); padding: 6px 16px; box-shadow: 4px 4px 0 var(--fg); }
+
+.next { background: var(--card); border: 2px solid var(--fg); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.next small { color: var(--muted); display: block; font-size: 12px; }
+.next > div { min-width: 0; overflow-wrap: anywhere; }
+
+/* goal cards */
+.goal { background: var(--card); border: 2px solid var(--fg); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.goal.done { border-color: var(--ok); }
+.gt { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.gt b { font-size: 16px; overflow-wrap: anywhere; }
+.gt span { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.bar { height: 10px; border: 2px solid var(--fg); background: var(--bg); }
+.bar i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.goal.done .bar i { background: var(--ok); }
+.money { display: flex; gap: 8px; align-items: center; font-size: 14px; flex-wrap: wrap; }
+.money input { flex: 1; min-width: 120px; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.steps label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; overflow-wrap: anywhere; }
+.steps input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ok); flex: none; }
+.steps .is-done span { color: var(--muted); text-decoration: line-through; }
+.foot { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+.del { background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+.del.armed { color: var(--accent); }
+
+/* form */
+form { background: var(--card); border: 2px solid var(--fg); border-radius: 8px; padding: 14px; display: grid; gap: 12px; }
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+input[type=text], input[type=date], input[type=number], textarea { font: inherit; color: var(--fg); background: var(--bg); border: 2px solid var(--line); border-radius: 6px; padding: 8px 10px; width: 100%; }
+textarea { min-height: 120px; resize: vertical; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn { font-family: var(--f-pixel); font-size: 15px; background: var(--accent); color: #fff; border: 2px solid var(--fg); border-radius: 6px; padding: 6px 14px; cursor: pointer; box-shadow: 2px 2px 0 var(--fg); white-space: nowrap; }
+.btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.ghost { background: var(--card); color: var(--fg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* bottom nav */
+nav.bottom { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 2px solid var(--line); z-index: 5;
+  padding: 6px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+nav.bottom div { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; }
+nav.bottom button { font: inherit; font-size: 14px; background: none; border: 0; color: var(--muted); padding: 6px 14px; cursor: pointer; }
+nav.bottom button.on { color: var(--fg); font-weight: 700; }
+</style>
+<style>[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="app">
+  <p class="notice" id="status">목표를 불러오는 중이에요…</p>
+  <div class="notice" id="keybox" hidden style="display:grid;gap:8px">받은 링크로 들어오면 바로 열려요. 우리 방 코드가 있으면 여기에 넣어 주세요.
+    <input type="text" id="k-in" placeholder="방 코드" autocomplete="off"><button class="btn" type="button" id="k-go" style="justify-self:start">들어가기</button></div>
+
+  <!-- MAP -->
+  <section class="view" id="v-map">
+    <div class="tabs" id="tabs"></div>
+    <h1 id="m-title">희넝이네 완주 지도</h1>
+    <div class="meta"><span class="big" id="m-amount"></span><span id="m-dday"></span></div>
+    <div class="map" id="map">
+      <svg viewBox="0 0 356 470" aria-hidden="true">
+        <path id="road" d="M120 450 C40 420 40 360 120 340 C200 320 230 300 200 250 C170 200 120 190 130 130 C140 70 210 60 300 52" fill="none" stroke="var(--fg)" stroke-width="30" stroke-linecap="round"/>
+        <path d="M120 450 C40 420 40 360 120 340 C200 320 230 300 200 250 C170 200 120 190 130 130 C140 70 210 60 300 52" fill="none" stroke="var(--road)" stroke-width="24" stroke-linecap="round"/>
+        <path d="M120 450 C40 420 40 360 120 340 C200 320 230 300 200 250 C170 200 120 190 130 130 C140 70 210 60 300 52" fill="none" stroke="var(--road-line)" stroke-width="3" stroke-dasharray="10 10"/>
+        <g id="dots"></g>
+        <g transform="translate(306 10)"><rect x="0" y="0" width="4" height="46" fill="var(--fg)"/><rect x="4" y="0" width="30" height="20" fill="var(--accent)" stroke="var(--fg)" stroke-width="2"/></g>
+      </svg>
+      <span class="finish">결승!</span>
+      <div class="pair" id="pair" style="left:30%;top:94%"><img class="g" src="img/gwan.png" alt="관이"><img class="n" src="img/neong.png" alt="넝이"></div>
+      <span class="bubble" id="bub" hidden></span>
+      <span class="cheer" id="cheer" hidden>완주! 🎉</span>
+    </div>
+    <div class="next" id="next" hidden><div><small id="n-label">다음 할 일</small><span id="n-text"></span></div><button class="btn" type="button" id="n-btn">체크!</button></div>
+  </section>
+
+  <!-- GOALS -->
+  <section class="view" id="v-goals" hidden>
+    <h1>우리 목표</h1>
+    <p class="muted" style="margin:0">칸을 체크하면 관이랑 넝이가 한 걸음씩 올라가요.</p>
+    <div id="cards" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
+
+  <!-- ADD -->
+  <section class="view" id="v-add" hidden>
+    <h1>새 목표 추가</h1>
+    <form id="add">
+      <label class="f">목표<input type="text" id="g-title" placeholder="예: 내년 봄에 제주도 여행 가기" required maxlength="60"></label>
+      <div class="two">
+        <label class="f">언제까지<input type="date" id="g-due"></label>
+        <label class="f">목표 금액 (만원, 선택)<input type="number" id="g-target" min="0" step="10" placeholder="예: 300"></label>
+      </div>
+      <label class="f">실천 단계 (한 줄에 하나씩, 한 줄이 한 칸)<textarea id="g-steps" placeholder="여행 적금 통장 만들기&#10;매달 30만원씩 모으기&#10;숙소 예약하기"></textarea></label>
+      <button class="btn" type="submit" id="g-submit" style="justify-self:start">목표 추가</button>
+    </form>
+  </section>
+</div>
+
+<nav class="bottom" aria-label="화면 이동"><div>
+  <button type="button" data-view="map" class="on">지도</button>
+  <button type="button" data-view="goals">목표</button>
+  <button type="button" data-view="add">추가</button>
+</div></nav>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
