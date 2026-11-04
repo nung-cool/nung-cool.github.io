@@ -69,9 +69,9 @@ h1 { font-family: var(--f-pixel); font-weight: 400; font-size: 24px; margin: 0; 
 .pair { position: absolute; display: flex; align-items: flex-end; transform: translate(-50%, -90%); transition: left 1.2s ease-in-out, top 1.2s ease-in-out; pointer-events: none; }
 .pair img { display: block; animation: hop 1s steps(2) infinite; }
 .pair img.g { height: 88px; }
-.pair img.n { height: 74px; margin-left: -14px; animation-delay: -.5s; }
+.pair img.n { height: 60px; margin-left: -14px; animation-delay: -.5s; }
 @keyframes hop { 50% { transform: translateY(-3px); } }
-@media (max-width: 380px) { .pair img.g { height: 72px; } .pair img.n { height: 61px; } }
+@media (max-width: 380px) { .pair img.g { height: 72px; } .pair img.n { height: 49px; } }
 .bubble { position: absolute; font-family: var(--f-pixel); font-size: 12px; background: var(--card); color: var(--fg); border: 2px solid var(--fg); padding: 1px 8px; white-space: nowrap; transform: translate(0, -100%); transition: left 1.2s, top 1.2s; }
 .finish { position: absolute; right: 8px; top: 13%; font-family: var(--f-pixel); font-size: 12px; background: var(--card); border: 2px solid var(--fg); padding: 1px 6px; }
 .cheer { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font-family: var(--f-pixel); font-size: 26px; background: var(--card); border: 3px solid var(--fg); padding: 6px 16px; box-shadow: 4px 4px 0 var(--fg); }
